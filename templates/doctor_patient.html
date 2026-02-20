@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Пациент: {{ patient.name }}{% endblock %}
+{% block content %}
+<h1>{{ patient.name }}</h1>
+<div class="card">
+  <h2>Лекарства</h2>
+  {% for med in meds %}<p>{{ med.drug_name }} {{ med.dosage }}</p>{% endfor %}
+</div>
+
+<div class="card">
+  <h2>АД (30 дней)</h2>
+  <canvas id="bp30Chart" height="150"></canvas>
+  <a href="{{ url_for('export_csv', patient_id=patient.id) }}" class="btn-secondary">📥 CSV Экспорт</a>
+</div>
+
+<div class="card">
+  <h2>Приверженность (30 дней)</h2>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+    {% for day in adh_30 %}
+    <div style="text-align:center;font-size:0.75rem;">
+      <div style="width:14px;height:14px;border-radius:3px;margin:0 auto;
+        background:{% if day.taken >= day.total and day.total > 0 %}#16A34A{% else %}#E2E8F0{% endif %};">
+      </div>
+      <span style="color:#64748B;">{{ day.date }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>Последние события</h2>
+  <table class="table">
+    <thead><tr><th>Время</th><th>Событие</th></tr></thead>
+    <tbody>
+      {% for ev in events %}
+      <tr><td>{{ ev.timestamp.strftime('%d.%m %H:%M') }}</td><td>{{ ev.event_type }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+const labels = {{ bp_30 | map(attribute='date') | list | tojson }};
+const sys = {{ bp_30 | map(attribute='systolic') | list | tojson }};
+new Chart(document.getElementById('bp30Chart'), {
+  type: 'line',
+  data: { labels: labels, datasets: [{ label: 'Сист.', data: sys, borderColor: 'red' }] },
+  options: { responsive: true, scales: { y: { min: 60, max: 190 } } }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Артериальное давление{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Измерить давление</h2>
+  {% if error %}<div class="alert-error">{{ error }}</div>{% endif %}
+  <form method="POST">
+    <div class="form-row">
+      <input type="number" name="systolic" placeholder="Систолическое" required>
+      <span>/</span>
+      <input type="number" name="diastolic" placeholder="Диастолическое" required>
+    </div>
+    <select name="context">
+      {% for val, label in contexts %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn-primary">Сохранить</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Динамика АД (7 дней)</h2>
+  <canvas id="bpChart" height="120"></canvas>
+  {% if avg_sys %}
+  <p class="stat-text">Среднее: {{ avg_sys }}/{{ avg_dia }} | В цели: {{ in_target_pct }}%</p>
+  {% endif %}
+  <a href="{{ url_for('export_pdf') }}" class="btn-secondary">📄 PDF Отчёт</a>
+
+  {% if latest_logs %}
+  <table class="table" style="margin-top:14px;">
+    <thead><tr><th>Дата</th><th>АД</th><th>Контекст</th></tr></thead>
+    <tbody>
+      {% for log in latest_logs %}
+      <tr>
+        <td>{{ log.timestamp.strftime('%d.%m %H:%M') }}</td>
+        <td>{{ log.systolic }}/{{ log.diastolic }}</td>
+        <td>{{ log.context }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<script>
+const labels = {{ bp_data | map(attribute='date') | list | tojson }};
+const sysData = {{ bp_data | map(attribute='systolic') | list | tojson }};
+const diaData = {{ bp_data | map(attribute='diastolic') | list | tojson }};
+new Chart(document.getElementById('bpChart'), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      { label: 'Сист.', data: sysData, borderColor: 'rgb(239, 68, 68)', tension: 0.3, spanGaps: true },
+      { label: 'Диаст.', data: diaData, borderColor: 'rgb(59, 130, 246)', tension: 0.3, spanGaps: true }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      annotation: {
+        annotations: {
+          targetLine: { type: 'line', yMin: {{ target_sys }}, yMax: {{ target_sys }}, borderColor: 'red', borderDash: [5, 5] }
+        }
+      }
+    },
+    scales: { y: { min: 60, max: 190 } }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Пациенты{% endblock %}
+{% block content %}
+<h1>Ваши пациенты</h1>
+<table class="table">
+  <thead><tr><th>Пациент</th><th>Приверженность</th><th>АД</th><th>Риск</th><th>Действия</th></tr></thead>
+  <tbody>
+    {% for p in patients %}
+    <tr class="{% if p.risk == 'high' %}risk-high{% elif p.risk == 'medium' %}risk-medium{% endif %}">
+      <td>{{ p.user.name }}</td>
+      <td>{{ p.adherence }}%</td>
+      <td>{{ p.last_bp }}</td>
+      <td>
+        {% if p.risk == 'low' %}<span class="badge-green">Низкий</span>
+        {% elif p.risk == 'medium' %}<span class="badge-yellow">Средний</span>
+        {% else %}<span class="badge-red">Высокий</span>{% endif %}
+      </td>
+      <td><a href="{{ url_for('doctor_patient', patient_id=p.user.id) }}" class="btn-secondary">Подробнее</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

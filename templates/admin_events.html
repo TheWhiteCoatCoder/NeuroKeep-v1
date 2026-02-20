@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}События{% endblock %}
+{% block content %}
+<h1>Поток событий</h1>
+<div id="events-table"></div>
+<script>
+function loadEvents() {
+  fetch('/api/events/latest').then(r => r.json()).then(data => {
+    let html = '<table class="table"><thead><tr><th>Время</th><th>Тип</th><th>Мета</th></tr></thead><tbody>';
+    data.forEach(e => {
+      html += `<tr><td>${e.timestamp}</td><td>${e.event_type}</td><td>${e.metadata || '-'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    document.getElementById('events-table').innerHTML = html;
+  });
+}
+loadEvents();
+setInterval(loadEvents, 5000);
+</script>
+{% endblock %}
