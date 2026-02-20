@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Данные пациента{% endblock %}
+{% block content %}
+<h2>Шаг 3: Ваши данные</h2>
+{% if error %}<div class="alert-error">{{ error }}</div>{% endif %}
+<form method="POST">
+  <input type="text" name="name" placeholder="Ваше имя" required>
+  <input type="tel" name="phone" placeholder="Телефон">
+  <input type="text" name="doctor_code" placeholder="Код врача (если есть)">
+  <button type="submit" class="btn-primary">Начать использование</button>
+</form>
+{% endblock %}

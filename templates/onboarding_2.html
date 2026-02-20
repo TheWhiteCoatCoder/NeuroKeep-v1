@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Цель по АД{% endblock %}
+{% block content %}
+<h2>Шаг 2: Целевые показатели АД</h2>
+<form method="POST">
+  <div class="form-row">
+    <input type="number" name="systolic" placeholder="Систолическое" value="140" required>
+    <span>/</span>
+    <input type="number" name="diastolic" placeholder="Диастолическое" value="90" required>
+    <span>мм рт.ст.</span>
+  </div>
+  <button type="submit" class="btn-primary">Далее →</button>
+</form>
+{% endblock %}

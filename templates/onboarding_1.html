@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Лекарства{% endblock %}
+{% block content %}
+<h2>Шаг 1: Ваши лекарства</h2>
+<form method="POST">
+  <div id="medication-list">
+    <div class="medication-item">
+      <input type="text" name="drug_name" placeholder="Название препарата" required>
+      <input type="text" name="dosage" placeholder="Дозировка (10мг)" required>
+      <select name="time_window" required>
+        <option value="">Время приёма</option>
+        {% for key, value in time_windows.items() %}
+        <option value="{{ key }}">{{ value[2] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <button type="button" id="add-med" class="btn-secondary">+ Ещё препарат</button>
+  <button type="submit" class="btn-primary">Далее →</button>
+</form>
+<script>
+document.getElementById('add-med').addEventListener('click', () => {
+  const list = document.getElementById('medication-list');
+  const newItem = document.createElement('div');
+  newItem.className = 'medication-item';
+  newItem.innerHTML = `
+    <input type="text" name="drug_name" placeholder="Название препарата" required>
+    <input type="text" name="dosage" placeholder="Дозировка" required>
+    <select name="time_window" required>
+      <option value="">Время приёма</option>
+      {% for key, value in time_windows.items() %}
+      <option value="{{ key }}">{{ value[2] }}</option>
+      {% endfor %}
+    </select>
+  `;
+  list.appendChild(newItem);
+});
+</script>
+{% endblock %}

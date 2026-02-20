@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Панель управления{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+  <div>
+    <h1>Добро пожаловать, {{ user.name }}!</h1>
+    <p class="subtitle" style="margin-top:4px;font-size:0.9rem;">
+      Отслеживайте приём лекарств и динамику АД в одном месте.
+    </p>
+  </div>
+  <div class="streak-box">🔥 Серия: {{ streak }} дней</div>
+</div>
+
+<div class="card">
+  <h2>Сегодняшние лекарства</h2>
+  {% if meds|length == 0 %}
+    <p class="stat-text">Пока нет назначенных препаратов. Добавьте их при онбординге.</p>
+  {% endif %}
+  {% for med in meds %}
+  <div class="medication-card {% if med.confirmed_today %}confirmed{% endif %}">
+    <div class="med-info">
+      <h3>{{ med.drug_name }} <span class="dosage">{{ med.dosage }}</span></h3>
+      <p class="time">{{ med.window_start }}–{{ med.window_end }}</p>
+      {% if med.confirmed_today %}
+      <span class="badge-green">✅ Принято</span>
+      {% elif med.in_window %}
+      <span class="badge-yellow">⏳ Время приёма</span>
+      {% else %}
+      <span class="badge-red">❌ Не подтверждено</span>
+      {% endif %}
+    </div>
+    {% if not med.confirmed_today and med.in_window %}
+    <div class="actions">
+      <button onclick="confirmDose({{ med.id }})" class="btn-primary">Подтвердить</button>
+      <button onclick="skipDose({{ med.id }})" class="btn-secondary">Пропустить</button>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2>Приверженность (7 дней)</h2>
+  <p class="stat-text">Дни с выполненным приёмом: {{ adherence_pct }}%.</p>
+  <canvas id="adherenceChart" height="100"></canvas>
+</div>
+
+<script>
+const adherenceData = {
+  labels: {{ adherence_data|map(attribute='date')|list|tojson }},
+  datasets: [{
+    label: 'Принято',
+    data: {{ adherence_data|map(attribute='taken')|list|tojson }},
+    backgroundColor: 'rgba(37, 99, 235, 0.5)'
+  },{
+    label: 'Всего',
+    data: {{ adherence_data|map(attribute='total')|list|tojson }},
+    backgroundColor: 'rgba(226, 232, 240, 0.8)'
+  }]
+};
+new Chart(document.getElementById('adherenceChart'), {
+  type: 'bar',
+  data: adherenceData,
+  options: { responsive: true, scales: { y: { beginAtZero: true } } }
+});
+function confirmDose(medId) {
+  fetch(`/confirm_dose/${medId}`, { method: 'POST' })
+    .then(r => r.json()).then(data => { if(data.success) location.reload(); });
+}
+function skipDose(medId) {
+  fetch(`/skip_dose/${medId}`, { method: 'POST' })
+    .then(r => r.json()).then(data => { if(data.success) location.reload(); });
+}
+</script>
+{% endblock %}

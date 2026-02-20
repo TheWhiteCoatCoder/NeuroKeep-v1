@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+<div class="hero">
+  <div class="hero-copy">
+    <h1>NeuroKeep — контроль гипертонии</h1>
+    <p class="subtitle">Умный трекер лекарств и артериального давления для пациентов и врачей.</p>
+
+    <ul>
+      <li>• Напоминания о приёме препаратов в нужное окно.</li>
+      <li>• Автоматический расчёт приверженности и серии приёмов.</li>
+      <li>• Графики АД и отчёты для врача за 7–30 дней.</li>
+    </ul>
+
+    <div class="cta-row">
+      <a href="{{ url_for('onboarding_1') }}" class="btn-secondary">Начать как пациент</a>
+      <a href="{{ url_for('doctor_login') }}" class="btn-secondary">Врачебный портал</a>
+    </div>
+  </div>
+
+  <div class="demo-form">
+    <h2 style="margin-bottom: 8px;">Получить демо-доступ</h2>
+    <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:10px;">
+      Оставьте контакты — пришлём доступ к демо-версии и короткое описание.
+    </p>
+
+    {% if demo_success %}
+    <div class="alert-success">✅ Заявка отправлена! Мы свяжемся с вами в ближайшее время.</div>
+    {% endif %}
+    {% if error %}
+    <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/demo_request">
+      <input type="text" name="name" placeholder="Ваше имя" required>
+      <input type="tel" name="phone" placeholder="Телефон" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <select name="role" required>
+        <option value="">Кто вы?</option>
+        <option value="patient">Пациент</option>
+        <option value="doctor">Врач</option>
+        <option value="clinic">Клиника / медцентр</option>
+      </select>
+      <button type="submit" class="btn-primary">Отправить заявку</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
